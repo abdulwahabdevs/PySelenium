@@ -5,35 +5,68 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 import os
-
-options = Options()
-options.add_argument("--start-maximized")
-
-browser = webdriver.Chrome(options=options)
-browser.get("https://github.com")
-
-sign_in_button = browser.find_element(By.LINK_TEXT, "Sign in")
-sign_in_button.click()
+import json
 
 # credentials are export to local terminal to be secure
 username = os.environ.get("GITHUB_USERNAME")
 password = os.environ.get("GITHUB_PASSWORD")
 
-# send credentials to the Github
-username_input = browser.find_element(By.ID, 'login_field').send_keys(username)
-password_input = browser.find_element(By.ID, 'password').send_keys(password)
+options = Options()
+options.add_argument("--start-maximized")  # optional: maximize window
 
-# after entering credentials find the sign in button and click
-sign_in_button = browser.find_element(By.NAME, "commit")
-sign_in_button.click()
+browser = webdriver.Chrome(options=options)
+browser.get("https://github.com")  # must load before adding cookies=
 
-# waiting for Github to respond
+cookies_path = os.path.join(os.path.dirname(__file__), "cookies.json")
+
 wait = WebDriverWait(browser, 15)
 
-profile_button = wait.until(EC.presence_of_element_located(
-    (By.XPATH, f"//*[@data-login='{username}']")))
+if os.path.exists(cookies_path):
+    with open(cookies_path, "r") as f:
+        cookies = json.load(f)
 
-print("Verified the GitHub login successfully!")
+    for cookie in cookies:
+        # Remove expiry if present to avoid errors
+        cookie.pop('expiry', None)
+        try:
+            browser.add_cookie(cookie)
+        except Exception:
+            pass
+
+    print("Cookies loaded from file")
+    browser.refresh()  # Browser now behaves as logged in
+
+else:
+    # wait object for login
+
+    # Click Sign in button
+    sign_in_button = browser.find_element(By.LINK_TEXT, "Sign in")
+    sign_in_button.click()
+
+    # send credentials to the Github
+    # wait.until to make sure everything was loaded
+    username_input = wait.until(
+        EC.presence_of_element_located((By.ID, 'login_field')))
+    username_input.send_keys(username)
+
+    password_input = wait.until(
+        EC.presence_of_element_located((By.ID, 'password')))
+    password_input.send_keys(password)
+    password_input.submit()
+
+    # Verifying login by comparing username with data login attribute
+    profile_button = wait.until(EC.presence_of_element_located(
+        (By.XPATH, f"//*[@data-login='{username}']")))
+
+    print("Login successfully!")
+
+    # Save cookies to a file
+    cookies = browser.get_cookies()  # Get all cookies from the session
+
+    with open("cookies.json", "w") as f:
+        json.dump(cookies, f)
+
+    print("Cookies saved to file")
 
 # no need for human confirmation anymore
 browser.quit()

@@ -35,4 +35,5 @@ profile_button = wait.until(EC.presence_of_element_located(
 
 print("Verified the GitHub login successfully!")
 
-input("Press Enter after observing the result...")
+# no need for human confirmation anymore
+browser.quit()

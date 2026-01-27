@@ -10,9 +10,14 @@ class LoginPage(BasePage):
     SIGN_IN_BUTTON = (By.NAME, "commit")
 
     def open(self):
-        # Assume we are on homepage
-        self.click(self.SIGN_IN_LINK)
-        self.wait_for_element(self.USERNAME_INPUT)
+        self.browser.get("https://github.com")
+
+        # Click Sign in only if visible
+        if self.is_element_visible(self.SIGN_IN_LINK):
+            self.click(self.SIGN_IN_LINK)
+
+        if self.is_element_visible(self.USERNAME_INPUT):
+            self.wait_for_element(self.USERNAME_INPUT)
 
     def login(self, username, password):
         self.type(self.USERNAME_INPUT, username)

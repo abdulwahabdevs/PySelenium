@@ -1,72 +1,71 @@
 from selenium import webdriver
-from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
+
+from pages.login_page import LoginPage
+from pages.home_page import HomePage
 
 import os
 import json
 
-# credentials are export to local terminal to be secure
-username = os.environ.get("GITHUB_USERNAME")
-password = os.environ.get("GITHUB_PASSWORD")
 
-options = Options()
-options.add_argument("--start-maximized")  # optional: maximize window
+def load_cookies(browser, path):
+    if not os.path.exists(path):
+        return False
 
-browser = webdriver.Chrome(options=options)
-browser.get("https://github.com")  # must load before adding cookies=
-
-cookies_path = os.path.join(os.path.dirname(__file__), "cookies.json")
-
-wait = WebDriverWait(browser, 15)
-
-if os.path.exists(cookies_path):
-    with open(cookies_path, "r") as f:
-        cookies = json.load(f)
+    with open(path, "r") as file:
+        cookies = json.load(file)
 
     for cookie in cookies:
-        # Remove expiry if present to avoid errors
         cookie.pop('expiry', None)
         try:
             browser.add_cookie(cookie)
         except Exception:
             pass
 
-    print("Cookies loaded from file")
-    browser.refresh()  # Browser now behaves as logged in
+    return True
 
-else:
-    # wait object for login
 
-    # Click Sign in button
-    sign_in_button = browser.find_element(By.LINK_TEXT, "Sign in")
-    sign_in_button.click()
+def save_cookies(browser, path):
+    cookies = browser.get_cookies()
+    with open(path, "w") as file:
+        json.dump(cookies, file)
 
-    # send credentials to the Github
-    # wait.until to make sure everything was loaded
-    username_input = wait.until(
-        EC.presence_of_element_located((By.ID, 'login_field')))
-    username_input.send_keys(username)
 
-    password_input = wait.until(
-        EC.presence_of_element_located((By.ID, 'password')))
-    password_input.send_keys(password)
-    password_input.submit()
+def main():
+    options = Options()
+    options.add_argument("--start-maximized")
 
-    # Verifying login by comparing username with data login attribute
-    profile_button = wait.until(EC.presence_of_element_located(
-        (By.XPATH, f"//*[@data-login='{username}']")))
+    browser = webdriver.Chrome(options=options)
 
-    print("Login successfully!")
+    cookies_path = "cookies.json"
 
-    # Save cookies to a file
-    cookies = browser.get_cookies()  # Get all cookies from the session
+    browser.get("https://github.com")
 
-    with open("cookies.json", "w") as f:
-        json.dump(cookies, f)
+    load_cookies(browser, cookies_path)
+    browser.refresh()
 
-    print("Cookies saved to file")
+    home_page = HomePage(browser)
 
-# no need for human confirmation anymore
-browser.quit()
+    if home_page.is_logged_in():
+        print("Already logged in (cookies worked!)")
+    else:
+        print("Not logged in yet - performing UI login")
+        username = os.getenv("GITHUB_USERNAME")
+        password = os.getenv("GITHUB_PASSWORD")
+
+        login_page = LoginPage(browser)
+        login_page.open()
+        login_page.login(username, password)
+
+        if home_page.is_logged_in(username):
+            save_cookies(browser, cookies_path)
+            print("Loggin and cookies saved")
+        else:
+            print("Login failed")
+
+    input("Press 'Enter' to exit>>>")
+    browser.quit()
+
+
+if __name__ == "__main__":
+    main()

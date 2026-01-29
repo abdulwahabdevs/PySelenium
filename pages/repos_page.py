@@ -4,6 +4,8 @@ from .base_page import BasePage
 
 class ReposPage(BasePage):
     CONTRIBUTIONS_BUTTON = (By.CSS_SELECTOR, 'a[href="?q=contributed-by:@me"]')
+    MY_REPOS_HEADER = (
+        By.CSS_SELECTOR, 'h1[data-testid="finder-header-title"] div[title="My repositories"]')
     REPOS_BUTTON = (By.CSS_SELECTOR, 'a[href="?q=owner:@me"]')
     REPO_LIST = (By.CSS_SELECTOR, 'ul[data-listview-component="item-list"]')
     REPO_COUNT = (By.CSS_SELECTOR, 'span[class*="ReposCountText"]')
@@ -13,6 +15,7 @@ class ReposPage(BasePage):
 
     def go_to_my_repos(self):
         self.click(self.REPOS_BUTTON)
+        self.wait_for_element(self.MY_REPOS_HEADER)
 
     def get_repo_names(self):
         pass

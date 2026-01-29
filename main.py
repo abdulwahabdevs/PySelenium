@@ -3,6 +3,7 @@ from selenium.webdriver.chrome.options import Options
 
 from pages.login_page import LoginPage
 from pages.home_page import HomePage
+from pages.repos_page import ReposPage
 
 import os
 import json
@@ -62,6 +63,12 @@ def main():
             print("Loggin and cookies saved")
         else:
             print("Login failed")
+
+    home_page.go_to_repositories()
+
+    repos_page = ReposPage(browser)
+    print("Repos page open:", repos_page.is_open())
+    print("Repos nav opened:", repos_page.go_to_my_repos())
 
     input("Press 'Enter' to exit>>>")
     browser.quit()

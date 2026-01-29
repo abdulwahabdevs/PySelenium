@@ -7,6 +7,12 @@ class BasePage:
         self.browser = browser
         self.wait = WebDriverWait(browser, timeout)
 
+    def find_element(self, locator):
+        return self.wait.until(EC.presence_of_element_located(locator))
+
+    def find_elements(self, locator):
+        return self.wait.until(EC.presence_of_all_elements_located(locator))
+
     def wait_for_element(self, locator):
         return self.wait.until(EC.visibility_of_element_located(locator))
 

@@ -68,7 +68,10 @@ def main():
 
     repos_page = ReposPage(browser)
     print("Repos page open:", repos_page.is_open())
-    print("Repos nav opened:", repos_page.go_to_my_repos())
+    repos_page.go_to_my_repos()
+    print("My repos page open:", repos_page.is_my_repos_page_open())
+    print(repos_page.get_repo_names())
+    print("Count", repos_page.get_repo_count())
 
     input("Press 'Enter' to exit>>>")
     browser.quit()

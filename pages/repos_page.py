@@ -6,20 +6,28 @@ class ReposPage(BasePage):
     CONTRIBUTIONS_BUTTON = (By.CSS_SELECTOR, 'a[href="?q=contributed-by:@me"]')
     MY_REPOS_HEADER = (
         By.CSS_SELECTOR, 'h1[data-testid="finder-header-title"] div[title="My repositories"]')
-    REPOS_BUTTON = (By.CSS_SELECTOR, 'a[href="?q=owner:@me"]')
-    REPO_LIST = (By.CSS_SELECTOR, 'ul[data-listview-component="item-list"]')
-    REPO_COUNT = (By.CSS_SELECTOR, 'span[class*="ReposCountText"]')
+    REPO_LIST = (By.CSS_SELECTOR, 'ul[data-listview-component="items-list"]')
+    REPO_COUNT = (
+        By.CSS_SELECTOR, 'div[class*="ReposListContainer"] span[class*="ReposCountText"]')
+    REPO_LINKS = (
+        By.CSS_SELECTOR, 'a[data-component="listview-title-link"]')
 
     def is_open(self):
         return self.is_element_visible(self.CONTRIBUTIONS_BUTTON)
 
     def go_to_my_repos(self):
-        self.click(self.REPOS_BUTTON)
+        self.browser.get("https://github.com/repos?q=owner:@me")
         self.wait_for_element(self.MY_REPOS_HEADER)
+        print("Current url:", self.browser.current_url)
+
+    def is_my_repos_page_open(self):
+        return self.is_element_visible(self.MY_REPOS_HEADER)
 
     def get_repo_names(self):
-        pass
+        repo_list = self.wait_for_element(self.REPO_LIST)
+        repo_elements = repo_list.find_elements(*self.REPO_LINKS)
+
+        return [repo.text.strip() for repo in repo_elements if repo.text.strip()]
 
     def get_repo_count(self):
-        pass
-        # return self.get_text(self.REPO_COUNT)
+        return self.get_text(self.REPO_COUNT)

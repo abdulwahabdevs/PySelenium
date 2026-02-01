@@ -79,9 +79,8 @@ def main():
 
     repo_page = RepoDetailsPage(browser)
     assert repo_page.is_open("PySelenium")
-    print(browser.current_url)
-
-    print("Repo page confirmed")
+    print("Repo: ", repo_page.get_repo_name())
+    print("Description: ", repo_page.get_repo_description())
 
     input("Press 'Enter' to exit>>>")
     browser.quit()

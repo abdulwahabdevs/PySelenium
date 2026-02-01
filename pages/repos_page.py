@@ -33,11 +33,12 @@ class ReposPage(BasePage):
         return [repo.text.strip() for repo in repo_elements if repo.text.strip()]
 
     def open_repo_by_name(self, repo_name):
-        repo_links = self.find_elements(self.REPO_LINKS)
+        repo_list = self.wait_for_element(self.REPO_LIST)
+        repo_elements = repo_list.find_elements(*self.REPO_LINKS)
 
-        for repo in repo_links:
+        for repo in repo_elements:
             if repo.text.strip() == repo_name:
                 repo.click()
                 return
 
-        raise Exception(f"Repository '{repo_name}' not found on page!")
+        raise Exception(f"Repository '{repo_name}' not found!")

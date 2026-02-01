@@ -69,9 +69,10 @@ def main():
     repos_page = ReposPage(browser)
     print("Repos page open:", repos_page.is_open())
     repos_page.go_to_my_repos()
-    print("My repos page open:", repos_page.is_my_repos_page_open())
-    print(repos_page.get_repo_names())
-    print("Count", repos_page.get_repo_count())
+    assert repos_page.is_my_repos_page_open()
+    print("Found", repos_page.get_repo_count())
+    for index, repo in enumerate(repos_page.get_repo_names()):
+        print(index + 1, repo)
 
     input("Press 'Enter' to exit>>>")
     browser.quit()

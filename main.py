@@ -4,6 +4,7 @@ from selenium.webdriver.chrome.options import Options
 from pages.login_page import LoginPage
 from pages.home_page import HomePage
 from pages.repos_page import ReposPage
+from pages.repo_details_page import RepoDetailsPage
 
 import os
 import json
@@ -67,12 +68,20 @@ def main():
     home_page.go_to_repositories()
 
     repos_page = ReposPage(browser)
-    print("Repos page open:", repos_page.is_open())
+    assert repos_page.is_open()
     repos_page.go_to_my_repos()
     assert repos_page.is_my_repos_page_open()
     print("Found", repos_page.get_repo_count())
     for index, repo in enumerate(repos_page.get_repo_names()):
         print(index + 1, repo)
+
+    repos_page.open_repo_by_name("abdulwahabdevs/PySelenium")
+
+    repo_page = RepoDetailsPage(browser)
+    assert repo_page.is_open("PySelenium")
+    print(browser.current_url)
+
+    print("Repo page confirmed")
 
     input("Press 'Enter' to exit>>>")
     browser.quit()

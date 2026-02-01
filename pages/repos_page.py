@@ -23,11 +23,21 @@ class ReposPage(BasePage):
     def is_my_repos_page_open(self):
         return self.is_element_visible(self.MY_REPOS_HEADER)
 
+    def get_repo_count(self):
+        return self.get_text(self.REPO_COUNT)
+
     def get_repo_names(self):
         repo_list = self.wait_for_element(self.REPO_LIST)
         repo_elements = repo_list.find_elements(*self.REPO_LINKS)
 
         return [repo.text.strip() for repo in repo_elements if repo.text.strip()]
 
-    def get_repo_count(self):
-        return self.get_text(self.REPO_COUNT)
+    def open_repo_by_name(self, repo_name):
+        repo_links = self.find_elements(self.REPO_LINKS)
+
+        for repo in repo_links:
+            if repo.text.strip() == repo_name:
+                repo.click()
+                return
+
+        raise Exception(f"Repository '{repo_name}' not found on page!")

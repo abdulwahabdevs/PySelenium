@@ -81,6 +81,7 @@ def main():
     assert repo_page.is_open("PySelenium")
     print("Repo: ", repo_page.get_repo_name())
     print("Description: ", repo_page.get_repo_description())
+    print("README content: ", repo_page.get_readme_content())
 
     input("Press 'Enter' to exit>>>")
     browser.quit()
